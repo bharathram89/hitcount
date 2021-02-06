@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, StatusBar, Text, ScrollView} from 'react-native';
+import {StyleSheet, View, StatusBar, Text, ScrollView, RefreshControl} from 'react-native';
 import {WHITE_COLOR} from '../../themes/colors';
 import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,53 +14,60 @@ import MyAuthController from '../../store/controllers/authControllers';
 import {LARGE} from '../../themes/fonts';
 import TileComponent from '../../components/tileComponent';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import MyApiController from '../../store/controllers/apiController';
 
 class HomeScreen extends Component {
-  componentDidMount() {
-    AsyncStorage.getItem(TOKEN_ASYNC_STORAGE)
-      .then((token) => {
-        console.log(
-          'TEST 01---TOKEN FOUND FROM ASYNC STORAGE IN HOME SCREEN ENTRY',
-        );
-        console.log(token);
-        if (token !== null) {
-          let savedToken = JSON.parse(token);
-          console.log('TEST 02---ASYSNC DATA FROM HOME SCREEN (THEN-IF BLOCK)');
-          console.log(savedToken);
-          //Apis Calling
-          MyAuthController.getPlayerStats(savedToken)
-            .then(() => {
-              console.log('okay');
-            })
-            .catch((err) => {
-              console.log('CATCH, HOME SCREEN, PLAYER STATS RESPONSE');
-              console.log(err);
-              this.toast.show(
-                'PLAYER STATS: Internal server error(502 Bad Gateway)',
-                2000,
-              );
-            });
 
-          MyAuthController.getUserData(savedToken)
-            .then(() => {
-              console.log('okay');
-            })
-            .catch((err) => {
-              console.log('CATCH, HOME SCREEN, USER DATA RESPONSE');
-              console.log(err);
-              this.toast.show(
-                'USER DATA: Internal server error(502 Bad Gateway)',
-                2000,
-              );
-            });
-        } else {
-          console.log('TEST 03---ASYSNC DATA IN HOME SCREEN (THEN-ELSE BLOCK)');
-        }
-      })
-      .catch((err) => {
-        console.log('TEST 04---ASYSNC DATA IN HOME SCREEN CATCH BLOCK');
-        console.log(err);
-      });
+  constructor(){
+    super();
+    this.PD_LOADED = false;
+    this.UD_LOADED = false;
+    this.state = {
+      isDataLoaded: false
+    }
+  }
+
+  componentDidMount() {
+       this._handleLoadData();
+  }
+
+  _handleIsLoading = () => {
+   this.setState({isDataLoaded: (this.UD_LOADED && this.PD_LOADED)});
+  }
+
+  _handleLoadData = () => {
+
+    this.UD_LOADED = false;
+    this.PD_LOADED = false;
+
+
+    MyApiController.call(MyAuthController.getPlayerStats, (error, response) => {
+      this.PD_LOADED = true;
+      this._handleIsLoading()
+      if(error){
+        console.log("ERROR in CALL: getPlayerStats");
+        console.log(error)
+      } else{
+      
+
+        console.log("Success response: getPlayerStats");
+        console.log(response);
+      }
+    })
+
+    MyApiController.call(MyAuthController.getUserData, (error, response) => {
+      this.UD_LOADED = true;
+      this._handleIsLoading()
+
+      if(error){
+        console.log("ERROR in CALL:getUserData");
+        console.log(error)
+      } else{
+        
+        console.log("Success response:getUserData");
+        console.log(response);
+      }
+    })
   }
 
   render() {
@@ -100,7 +107,7 @@ class HomeScreen extends Component {
             </Ripple>
           </View>
         </View>
-        <ScrollView>
+        <ScrollView refreshControl={ <RefreshControl refreshing={!this.state.isDataLoaded} onRefresh={this._handleLoadData}/>}>
           <Text style={styles.headingStyle}>Player Stats Summary:</Text>
           <TileComponent name={'User Id'} value={this.props.stats.userID} />
           <TileComponent name={'Email'} value={this.props.stats.email} />

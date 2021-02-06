@@ -124,7 +124,7 @@ export default class CustomTextField extends Component {
               style={[
                 styles.errorTextStyle,
                 {
-                  color: 'red',
+                  color: '#E06666',
                   paddingLeft: errTextPadding ? errTextPadding : '12.5%',
                 },
               ]}>

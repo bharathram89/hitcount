@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import {THEME_COLOR, WHITE_COLOR} from '../../themes/colors';
 import CustomButton from '../../components/customButton';
@@ -19,13 +20,16 @@ import Toast, {DURATION} from 'react-native-easy-toast';
 
 class LoginScreen extends Component {
   state = {
-    email: '',
-    password: '',
-    usertype: '',
+    email: '', ///sivhitcounter@gmail.com
+    password: '', /// testasdfasdf
+    usertype: 'player',
     spinner: false,
+    errMessage: ""
   };
 
   HandleLoginPress = () => {
+    this.setState({errMessage:""})
+
     let validated = true;
     if (!this.emailRef.InputsValidation()) {
       validated = false;
@@ -59,7 +63,11 @@ class LoginScreen extends Component {
           this.setState({spinner: false});
           console.log('CATCH, LOGIN SCREEN, USER LOGIN API');
           console.log(err);
-          this.toast.show('Internal server error(502 Bad Gateway)', 2000);
+          if(Platform.OS === "android"){
+            this.toast.show(err.error.message, 2000);
+          }else{
+            this.setState({errMessage:err.error.message})
+          }
         });
     } else if (validated === false) {
       console.log('Email, Password and UserType Required!!');
@@ -119,6 +127,8 @@ class LoginScreen extends Component {
 
           {/* Login Button */}
           <View style={{height: 20}} />
+          <Text style={{alignSelf:"center", color: "#E06666"}}>{this.state.errMessage}</Text>
+          <View style={{height: 45}}>
           {state.spinner ? (
             <ActivityIndicator color={THEME_COLOR} size={40} />
           ) : (
@@ -131,7 +141,8 @@ class LoginScreen extends Component {
               }}
             />
           )}
-
+            </View>
+          
           {/* Toast about Internet Status */}
           <Toast
             ref={(toast) => (this.toast = toast)}
