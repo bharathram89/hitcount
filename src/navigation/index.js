@@ -7,6 +7,7 @@ import {
 
 //Screens
 import SplashScreen from '../screens/splashScreen';
+import SignupScreen from '../screens/signupScreen';
 import LoginScreen from '../screens/loginScreen';
 import HomeScreen from '../screens/HomeScreen';
 
@@ -20,6 +21,16 @@ function AppContainer() {
         <AppStack.Screen
           name="SplashScreen"
           component={SplashScreen}
+          options={{
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+            headerShown: false,
+          }}
+        />
+        <AppStack.Screen
+          name="SignupScreen"
+          component={SignupScreen}
           options={{
             cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
             gestureEnabled: true,

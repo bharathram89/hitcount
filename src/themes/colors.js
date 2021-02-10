@@ -3,3 +3,4 @@ export const WHITE_COLOR = '#FFFFFF';
 export const ICONS_COLOR = '#9B9B9B';
 export const TEXT_COLOR = '#9B9B9B';
 export const THEME_COLOR = '#E06666';
+export const PRIMARY_COLOR = '#C3CDB5';

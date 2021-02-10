@@ -14,38 +14,38 @@ import CustomButton from '../../components/customButton';
 import CustomTextInput from '../../components/customTextInput';
 import styles from './styles';
 import MyAuthController from '../../store/controllers/authControllers';
-import {connect} from 'react-redux';
 import {CommonActions} from '@react-navigation/native';
 import Toast, {DURATION} from 'react-native-easy-toast';
 
-class LoginScreen extends Component {
+class SignupScreen extends Component {
   state = {
-    email: '', ///sivhitcounter@gmail.com
-    password: '', /// testasdfasdf
+    gamerTag: 'zbram-MOSTAC',
+    email: '',
+    password: '',
     usertype: 'player',
     spinner: false,
     errMessage: '',
   };
 
-  HandleLoginPress = () => {
-    this.setState({errMessage: ''});
-
+  HandleSignupPress = () => {
     let validated = true;
+
+    if (!this.gamerTagRef.InputsValidation()) {
+      validated = false;
+    }
     if (!this.emailRef.InputsValidation()) {
       validated = false;
     }
-
     if (!this.passwordRef.InputsValidation()) {
       validated = false;
     }
-
     if (!this.usertypeRef.InputsValidation()) {
       validated = false;
     }
-
     if (validated === true) {
       this.setState({spinner: true});
-      MyAuthController.loginUser(
+      MyAuthController.registerUser(
+        this.state.gamerTag.trim(),
         this.state.email.trim(),
         this.state.password.trim(),
         this.state.usertype.trim(),
@@ -55,13 +55,13 @@ class LoginScreen extends Component {
           this.props.navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{name: 'HomeScreen'}],
+              routes: [{name: 'LoginScreen'}],
             }),
           );
         })
         .catch((err) => {
           this.setState({spinner: false});
-          console.log('CATCH, LOGIN SCREEN, USER LOGIN API');
+          console.log('CATCH, LOGIN SCREEN, USER REGISTER API');
           console.log(err);
           if (Platform.OS === 'android') {
             this.toast.show(err.error.message, 2000);
@@ -70,7 +70,7 @@ class LoginScreen extends Component {
           }
         });
     } else if (validated === false) {
-      console.log('Email, Password and UserType Required!!');
+      console.log('Fields are missing!!');
     }
   };
 
@@ -91,8 +91,18 @@ class LoginScreen extends Component {
           </View>
 
           <View style={{height: 30}} />
-          <Text style={styles.pageTitleTextStyle}>Login</Text>
+          <Text style={styles.pageTitleTextStyle}>Sign Up</Text>
           <View style={{height: 20}} />
+
+          <CustomTextInput
+            iconName="gamepad"
+            placeholder="Gamer Tag"
+            value={state.gamerTag}
+            onChangeText={(text) => this.setState({gamerTag: text})}
+            keyboardType="default"
+            errorText="Gamer Tag is required"
+            ref={(e) => (this.gamerTagRef = e)}
+          />
 
           <CustomTextInput
             iconName="user"
@@ -137,23 +147,24 @@ class LoginScreen extends Component {
               <CustomButton
                 showIcon
                 iconName={'sign-in'}
+                buttonText={'Sign Up'}
                 backgroundColor={THEME_COLOR}
                 onPress={() => {
-                  this.HandleLoginPress();
+                  this.HandleSignupPress();
                 }}
               />
             )}
           </View>
 
           <TouchableOpacity
-            onPress={() => this.props.navigation.navigate('SignupScreen')}>
+            onPress={() => this.props.navigation.navigate('LoginScreen')}>
             <Text style={{paddingTop: 20, textAlign: 'center'}}>
-              Don't have an account?
+              Already have an account?
               <Text
                 style={{
                   fontWeight: 'bold',
                   paddingTop: 10,
-                }}>{` Sign Up`}</Text>
+                }}>{` Login`}</Text>
             </Text>
           </TouchableOpacity>
 
@@ -173,8 +184,4 @@ class LoginScreen extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({
-  // isInternetAvailable: state.AuthReducer.internetStatus,
-});
-
-export default connect(mapStateToProps, null)(LoginScreen);
+export default SignupScreen;

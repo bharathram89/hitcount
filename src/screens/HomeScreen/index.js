@@ -1,83 +1,86 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, StatusBar, Text, ScrollView, RefreshControl} from 'react-native';
-import {WHITE_COLOR} from '../../themes/colors';
-import {connect} from 'react-redux';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Ripple from 'react-native-material-ripple';
 import {
-  DATA_ASYNC_STORAGE,
-  TOKEN_ASYNC_STORAGE,
-} from '../../store/controllers/types';
+  StyleSheet,
+  View,
+  StatusBar,
+  Text,
+  ScrollView,
+  RefreshControl,
+  Image,
+} from 'react-native';
+import {BLACK_COLOR, PRIMARY_COLOR, WHITE_COLOR} from '../../themes/colors';
+import {connect} from 'react-redux';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import Ripple from 'react-native-material-ripple';
+import {DATA_ASYNC_STORAGE} from '../../store/controllers/types';
 import AsyncStorage from '@react-native-community/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import MyAuthController from '../../store/controllers/authControllers';
-import {LARGE} from '../../themes/fonts';
+import {LARGE, MEDIUM} from '../../themes/fonts';
 import TileComponent from '../../components/tileComponent';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import MyApiController from '../../store/controllers/apiController';
 
 class HomeScreen extends Component {
-
-  constructor(){
+  constructor() {
     super();
     this.PD_LOADED = false;
     this.UD_LOADED = false;
     this.state = {
-      isDataLoaded: false
-    }
+      isDataLoaded: false,
+    };
   }
 
   componentDidMount() {
-       this._handleLoadData();
+    this._handleLoadData();
   }
 
   _handleIsLoading = () => {
-   this.setState({isDataLoaded: (this.UD_LOADED && this.PD_LOADED)});
-  }
+    this.setState({isDataLoaded: this.UD_LOADED && this.PD_LOADED});
+  };
 
   _handleLoadData = () => {
-
     this.UD_LOADED = false;
     this.PD_LOADED = false;
 
-
     MyApiController.call(MyAuthController.getPlayerStats, (error, response) => {
       this.PD_LOADED = true;
-      this._handleIsLoading()
-      if(error){
-        console.log("ERROR in CALL: getPlayerStats");
-        console.log(error)
-      } else{
-      
-
-        console.log("Success response: getPlayerStats");
+      this._handleIsLoading();
+      if (error) {
+        console.log('ERROR in CALL: getPlayerStats');
+        console.log(error);
+      } else {
+        console.log('Success response: getPlayerStats');
         console.log(response);
       }
-    })
+    });
 
     MyApiController.call(MyAuthController.getUserData, (error, response) => {
       this.UD_LOADED = true;
-      this._handleIsLoading()
+      this._handleIsLoading();
 
-      if(error){
-        console.log("ERROR in CALL:getUserData");
-        console.log(error)
-      } else{
-        
-        console.log("Success response:getUserData");
+      if (error) {
+        console.log('ERROR in CALL:getUserData');
+        console.log(error);
+      } else {
+        console.log('Success response:getUserData');
         console.log(response);
       }
-    })
-  }
+    });
+  };
 
   render() {
     return (
       <View style={styles.containerStyle}>
-        <StatusBar backgroundColor={WHITE_COLOR} barStyle={'dark-content'} />
+        <StatusBar backgroundColor={PRIMARY_COLOR} barStyle={'dark-content'} />
+
+        {/* Header */}
         <View style={styles.headerViewStyle}>
           <View style={{flex: 1}} />
           <View style={[styles.flexStyle, {flex: 3}]}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>HitCount</Text>
+            <Text style={{fontSize: 20, fontWeight: 'bold', color: '#0037FF'}}>
+              "Hit Counter"
+            </Text>
           </View>
           <View style={styles.flexStyle}>
             <Ripple
@@ -107,66 +110,214 @@ class HomeScreen extends Component {
             </Ripple>
           </View>
         </View>
-        <ScrollView refreshControl={ <RefreshControl refreshing={!this.state.isDataLoaded} onRefresh={this._handleLoadData}/>}>
-          <Text style={styles.headingStyle}>Player Stats Summary:</Text>
-          <TileComponent name={'User Id'} value={this.props.stats.userID} />
-          <TileComponent name={'Email'} value={this.props.stats.email} />
-          <TileComponent
-            name={'Total Kills'}
-            value={this.props.stats.totalKills}
-          />
-          <TileComponent
-            name={'Total Revived'}
-            value={this.props.stats.totalRevived}
-          />
-          <TileComponent
-            name={'Total Respawn'}
-            value={this.props.stats.totalRespawn}
-          />
-          <TileComponent
-            name={'Total Mediced'}
-            value={this.props.stats.totalMediced}
-          />
-          <TileComponent
-            name={'Total Death'}
-            value={this.props.stats.totalDeath}
-          />
-          <TileComponent
-            name={'Total Games'}
-            value={this.props.stats.totalGames}
-          />
-          <View style={{height: 20}} />
 
-          <Text style={styles.headingStyle}>User Data:</Text>
-          <TileComponent name={'Email'} value={this.props.data.email} />
-          <TileComponent name={'User Type'} value={this.props.data.userType} />
-          <TileComponent name={'Gamer Tag'} value={this.props.data.gamerTag} />
-          <TileComponent
-            name={'Player Id'}
-            value={this.props.data.playerProfileID}
-          />
-          <TileComponent name={'User Id'} value={this.props.data.userID} />
-          <TileComponent name={'Facebook'} value={this.props.data.facebook} />
-          <TileComponent name={'Youtube'} value={this.props.data.youtube} />
-          <TileComponent name={'Twitter'} value={this.props.data.twitter} />
-          <TileComponent name={'Clan Tag'} value={this.props.data.clanTag} />
-          <TileComponent
-            name={'Profile Pic'}
-            value={this.props.data.profilepic}
-          />
-          <TileComponent name={'About'} value={this.props.data.about} />
+        <View style={{height: 1, backgroundColor: BLACK_COLOR}} />
+        <View style={{height: 50, flexDirection: 'row'}}>
+          <View style={styles.flexStyle}>
+            <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+              Past Games
+            </Text>
+          </View>
+          <View style={{width: 1, backgroundColor: BLACK_COLOR}} />
+          <View style={styles.flexStyle}>
+            <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+              New Games
+            </Text>
+          </View>
+        </View>
+        <View style={{height: 1, backgroundColor: BLACK_COLOR}} />
 
-          {/* Toast about Internet Status */}
-          <Toast
-            ref={(toast) => (this.toast = toast)}
-            style={{backgroundColor: '#666666', borderRadius: 5}}
-            position={'bottom'}
-            positionValue={200}
-            fadeInDuration={750}
-            fadeOutDuration={1000}
-            textStyle={{color: 'white'}}
-          />
-        </ScrollView>
+        <View style={{flex: 6}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={!this.state.isDataLoaded}
+                onRefresh={this._handleLoadData}
+              />
+            }>
+            <View style={{height: 200, flexDirection: 'row'}}>
+              <View style={styles.flexStyle}>
+                <Image
+                  source={require('../../images/image.jpg')}
+                  style={{height: 130, width: 130, borderRadius: 100}}
+                />
+              </View>
+              <View style={[styles.flexStyle, {flex: 1.3}]}>
+                <Text
+                  style={{fontSize: 15, fontWeight: 'bold', paddingRight: 25}}>
+                  {this.props.data.about
+                    ? this.props.data.about
+                    : 'About is null'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={{height: 50, flexDirection: 'row'}}>
+              <View style={styles.flexStyle}>
+                <View style={styles.tagStyle}>
+                  <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+                    {this.props.data.clanTag
+                      ? this.props.data.clanTag
+                      : 'Clan Tag'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.flexStyle}>
+                <View style={styles.tagStyle}>
+                  <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+                    {this.props.data.gamerTag
+                      ? this.props.data.gamerTag
+                      : 'Gamer Tag'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.boxOutterViewStyle}>
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <View style={{height: 2, backgroundColor: '#B5824E'}} />
+                <View style={styles.boxStyle}>
+                  <View style={{width: 2, backgroundColor: '#B5824E'}} />
+                  <View
+                    style={[styles.flexStyle, {backgroundColor: '#EBCFB7'}]}>
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      Total Kills
+                    </Text>
+                    <View style={{height: 30}} />
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      {this.props.stats.totalKills
+                        ? this.props.stats.totalKills
+                        : null}
+                    </Text>
+                  </View>
+                  <View style={{width: 2, backgroundColor: '#B5824E'}} />
+                  <View
+                    style={[styles.flexStyle, {backgroundColor: '#EBCFB7'}]}>
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      Death Ratio
+                    </Text>
+                    <View style={{height: 30}} />
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      {this.props.stats.totalDeath
+                        ? this.props.stats.totalDeath
+                        : null}
+                    </Text>
+                  </View>
+                  <View style={{width: 2, backgroundColor: '#B5824E'}} />
+                  <View
+                    style={[styles.flexStyle, {backgroundColor: '#EBCFB7'}]}>
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      Total Games
+                    </Text>
+                    <View style={{height: 30}} />
+                    <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                      {this.props.stats.totalGames
+                        ? this.props.stats.totalGames
+                        : null}
+                    </Text>
+                  </View>
+                  <View style={{width: 2, backgroundColor: '#B5824E'}} />
+                </View>
+                <View
+                  style={{
+                    height: 2.3,
+                    backgroundColor: '#B5824E',
+                    marginBottom: 2,
+                  }}
+                />
+              </View>
+            </View>
+
+            <View
+              style={{
+                height: 1.5,
+                backgroundColor: '#B5824E',
+                width: '70%',
+                alignSelf: 'center',
+              }}
+            />
+
+            <View
+              style={{
+                height: 200,
+                justifyContent: 'center',
+              }}>
+              <Text
+                style={{paddingLeft: 40, fontWeight: 'bold', fontSize: MEDIUM}}>
+                Share
+              </Text>
+              <View style={{height: 10}} />
+              <View
+                style={{
+                  height: 60,
+                  flexDirection: 'row',
+                  width: '90%',
+                  alignSelf: 'center',
+                }}>
+                <View style={styles.flexStyle}>
+                  <Ripple
+                    style={styles.rippleStyle}
+                    rippleContainerBorderRadius={50}
+                    rippleCentered={true}>
+                    <Icon name={'facebook'} size={25} />
+                  </Ripple>
+                </View>
+                <View style={styles.flexStyle}>
+                  <Ripple
+                    style={styles.rippleStyle}
+                    rippleContainerBorderRadius={50}
+                    rippleCentered={true}>
+                    <Icon name={'instagram-square'} size={25} />
+                  </Ripple>
+                </View>
+                <View style={styles.flexStyle}>
+                  <Ripple
+                    style={styles.rippleStyle}
+                    rippleContainerBorderRadius={50}
+                    rippleCentered={true}>
+                    <Icon name={'google-plus'} size={25} />
+                  </Ripple>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+          }}>
+          <View style={{height: 1, backgroundColor: BLACK_COLOR}} />
+          <View style={{height: 50, flexDirection: 'row'}}>
+            <View style={styles.flexStyle}>
+              <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>Home</Text>
+            </View>
+            <View style={{width: 1, backgroundColor: BLACK_COLOR}} />
+            <View style={styles.flexStyle}>
+              <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                Profile
+              </Text>
+            </View>
+            <View style={{width: 1, backgroundColor: BLACK_COLOR}} />
+            <View style={styles.flexStyle}>
+              <Text style={{fontSize: MEDIUM, fontWeight: 'bold'}}>
+                Custom Game
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Toast about Internet Status */}
+        <Toast
+          ref={(toast) => (this.toast = toast)}
+          style={{backgroundColor: '#666666', borderRadius: 5}}
+          position={'bottom'}
+          positionValue={200}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          textStyle={{color: 'white'}}
+        />
       </View>
     );
   }
@@ -182,8 +333,27 @@ export default connect(mapStateToProps, null)(HomeScreen);
 const styles = StyleSheet.create({
   containerStyle: {
     flex: 1,
+    backgroundColor: PRIMARY_COLOR,
   },
-
+  tagStyle: {
+    height: 45,
+    width: 130,
+    backgroundColor: WHITE_COLOR,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  boxOutterViewStyle: {
+    height: 190,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  boxStyle: {
+    height: 100,
+    width: '80%',
+    alignSelf: 'center',
+    flexDirection: 'row',
+  },
   headingStyle: {
     fontSize: LARGE,
     fontWeight: 'bold',
@@ -191,7 +361,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   headerViewStyle: {
-    height: 70,
+    height: 60,
     flexDirection: 'row',
   },
   flexStyle: {
@@ -212,8 +382,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   rippleStyle: {
-    height: 60,
-    width: 60,
+    height: 50,
+    width: 50,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
