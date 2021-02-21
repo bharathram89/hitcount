@@ -9,7 +9,7 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import {THEME_COLOR, WHITE_COLOR} from '../../themes/colors';
+import {THEME_COLOR, WHITE_COLOR, PRIMARY_COLOR} from '../../themes/colors';
 import CustomButton from '../../components/customButton';
 import CustomTextInput from '../../components/customTextInput';
 import styles from './styles';
@@ -17,6 +17,7 @@ import MyAuthController from '../../store/controllers/authControllers';
 import {connect} from 'react-redux';
 import {CommonActions} from '@react-navigation/native';
 import Toast, {DURATION} from 'react-native-easy-toast';
+// import { LinearGradient } from 'expo-linear-gradient';
 
 class LoginScreen extends Component {
   state = {
@@ -77,8 +78,9 @@ class LoginScreen extends Component {
   render() {
     const {state} = this;
     return (
-      <View style={styles.container}>
-        <StatusBar backgroundColor={WHITE_COLOR} barStyle={'dark-content'} />
+      <View style={styles.containerStyle}>
+       
+        <StatusBar backgroundColor={PRIMARY_COLOR} barStyle={'dark-content'} />
         <ScrollView
           keyboardShouldPersistTaps={'always'}
           showsVerticalScrollIndicator={false}

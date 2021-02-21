@@ -19,7 +19,7 @@ import Toast, {DURATION} from 'react-native-easy-toast';
 
 class SignupScreen extends Component {
   state = {
-    gamerTag: 'zbram-MOSTAC',
+    gamerTag: '',
     email: '',
     password: '',
     usertype: 'player',

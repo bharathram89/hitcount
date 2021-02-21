@@ -1,13 +1,14 @@
-import {BLACK_COLOR, WHITE_COLOR} from '../../themes/colors';
+import {BLACK_COLOR, WHITE_COLOR, PRIMARY_COLOR} from '../../themes/colors';
 import {EXTRA_LARGE, SMALL} from '../../themes/fonts';
 import {StyleSheet} from 'react-native';
-
+ 
 const Styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  
+  containerStyle: {
+    flex: 1, 
+    backgroundColor:  PRIMARY_COLOR,
     justifyContent: 'center',
-    backgroundColor: WHITE_COLOR,
-  },
+  }, 
   logoViewStyle: {
     height: 50,
     width: '100%',
