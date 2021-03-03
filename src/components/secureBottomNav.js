@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TouchableHighlight, Image } from 'react-native';
-import { WHITE_COLOR, BLACK_COLOR } from '../themes/colors';
+import { WHITE_COLOR, BLACK_COLOR , PRIMARY_COLOR} from '../themes/colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {CommonActions , withNavigation} from '@react-navigation/native'; 
 import Ripple from 'react-native-material-ripple';
@@ -37,16 +37,25 @@ class SecureBottomNav extends Component {
                     }}>
                     <View style={{ height: 1, backgroundColor: BLACK_COLOR }} />
                     <View style={{ height: 50, flexDirection: 'row' }}>
-                        <View style={styles.flexStyle}>
-                            <Text style={{ fontSize: MEDIUM, fontWeight: 'bold' }}>Home</Text>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.navigate('HomeScreen')}
+                            style={styles.flexStyle}
+                        >
+                        <View  >
+                            <Text style={styles.nav}>GO HOME</Text>
                         </View>
+                        </TouchableOpacity>
                         <View style={{ width: 1, backgroundColor: BLACK_COLOR }} />
-                       
-                        <View style={styles.flexStyle}>
-                            <Text style={{ fontSize: MEDIUM, fontWeight: 'bold' }}>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.navigate('NewGameScreen')}
+                            style={styles.flexStyle}
+                        >
+                        <View >
+                            <Text style={styles.nav}>
                                 Custom Game
                             </Text>
                         </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -66,8 +75,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     flexStyle: {
+        backgroundColor: PRIMARY_COLOR,
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        flexDirection: 'row' 
     }
 });
