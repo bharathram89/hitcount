@@ -180,7 +180,7 @@ class SecureTopNav extends Component {
                     >
                         <View>
                             <Text style={styles.nav}>
-                               Start New Game
+                               Start New Game NOW
                             </Text>
                         </View>
                     </TouchableOpacity>

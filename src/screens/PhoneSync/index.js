@@ -29,34 +29,110 @@ import MyApiController from '../../store/controllers/apiController';
 import SecureBottomNav from '../../components/secureBottomNav';
 import { AppRegistry } from "react-native";
 // import App from "react-native-ble-manager/example/App"; //<-- simply point to the example js!
-
+// AppRegistry.registerComponent("PhoneSync", () => App);
 import { v4 as uuidv4 } from 'uuid';
 
 import BleManager from 'react-native-ble-manager';
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-const PhoneSync = () => {
-  const [isScanning, setIsScanning] = useState(false);
-  const peripherals = new Map();
-  const [list, setList] = useState([]);
+class PhoneSync extends Component { 
+  // const [isScanning, setIsScanning] = useState(false);
+  peripherals = new Map();
+  // const [list, setList] = useState([]);
+  isScanning= false;
+  
+  list=[]; 
+  setList(newList){
+    this.props.list = newList
+  }
+  render() {
 
-   const uuid = () => {
-	let d = new Date().getTime();
+    return (
+      <View style={styles.containerStyle}>
+      <StatusBar backgroundColor={PRIMARY_COLOR} barStyle={'dark-content'} />
 
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-		const r = (d + Math.random() * 16) % 16 | 0;
-		d = Math.floor(d / 16);
+      {/* Header */}
+      <SecureTopNav navigation={this.props.navigation}></SecureTopNav>
+ 
+ 
+      <SafeAreaView>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          style={styles.scrollView}>
+           
+          <View style={styles.body}>
+            
+            <View style={{margin: 10}}>
+              <Button 
+                title={'Scan Bluetooth (' + (this.props.isScanning ? 'on' : 'off') + ')'}
+                onPress={() => this.startScan() } 
+              />            
+            </View>
 
-		return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-	});
-}
+            <View style={{margin: 10}}>
+              <Button title="Retrieve connected peripherals" onPress={() => this.retrieveConnected() } />
+            </View>
 
-  const startScan = () => {
-    if (!isScanning) {
-        let id=uuid();
-        console.log(id,"ID")  
-      BleManager.scan([id], 3, true).then((results) => {
+            
+            {(this.list.length == 0) &&
+              <View style={{flex:1, margin: 20}}>
+                <Text style={{textAlign: 'center'}}>No peripherals</Text>
+              </View>
+            }      
+        <FlatList
+            data={this.props.list}
+            renderItem={({ item }) => this.renderItem(item) }
+            keyExtractor={item => item.id}
+          />           
+          </View>      
+          </ScrollView>     
+      </SafeAreaView>
+       
+            <SecureBottomNav navigation={this.props.navigation}></SecureBottomNav>
+      
+            </View>
+  )}
+ 
+  setIsScanning(val){
+    this.props.isScanning = val;
+  };
+  uuid(){
+    let d = new Date().getTime();
+
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  }
+
+   startScan(){
+    BleManager.start({showAlert: false});
+    
+    if (Platform.OS === 'android' && Platform.Version >= 23) {
+      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
+          if (result) {
+            console.log("Permission is OK");
+          } else {
+            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
+              if (result) {
+                console.log("User accept");
+              } else {
+                console.log("User refuse");
+              }
+            });
+          }
+      });
+    }  
+    
+    bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
+    bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan );
+    bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', handleDisconnectedPeripheral );
+    bleManagerEmitter.addListener('BleManagerDidUpdateValueForCharacteristic', handleUpdateValueForCharacteristic );
+    if (!this.props.isScanning) {
+      BleManager.scan([], 3, true).then((results) => {
         console.log('Scanning...');
         setIsScanning(true);
       }).catch(err => {
@@ -65,12 +141,12 @@ const PhoneSync = () => {
     }    
   }
 
-  const handleStopScan = () => {
+  handleStopScan(){
     console.log('Scan is stopped');
     setIsScanning(false);
   }
 
-  const handleDisconnectedPeripheral = (data) => {
+  handleDisconnectedPeripheral(data){
     let peripheral = peripherals.get(data.peripheral);
     if (peripheral) {
       peripheral.connected = false;
@@ -80,11 +156,11 @@ const PhoneSync = () => {
     console.log('Disconnected from ' + data.peripheral);
   }
 
-  const handleUpdateValueForCharacteristic = (data) => {
+  handleUpdateValueForCharacteristic(data){
     console.log('Received data from ' + data.peripheral + ' characteristic ' + data.characteristic, data.value);
   }
 
-  const retrieveConnected = () => {
+  retrieveConnected(){
     BleManager.getConnectedPeripherals([]).then((results) => {
       if (results.length == 0) {
         console.log('No connected peripherals')
@@ -99,7 +175,7 @@ const PhoneSync = () => {
     });
   }
 
-  const handleDiscoverPeripheral = (peripheral) => {
+  handleDiscoverPeripheral(peripheral){
     console.log('Got ble peripheral', peripheral);
     if (!peripheral.name) {
       peripheral.name = 'NO NAME';
@@ -108,7 +184,7 @@ const PhoneSync = () => {
     setList(Array.from(peripherals.values()));
   }
 
-  const testPeripheral = (peripheral) => {
+  testPeripheral  (peripheral) {
     if (peripheral){
       if (peripheral.connected){
         BleManager.disconnect(peripheral.id);
@@ -184,16 +260,16 @@ const PhoneSync = () => {
 
   }
 
-  const renderItem = (item) => {
+   renderItem (item){
     const color = item.connected ? 'green' : '#fff';
 
     useEffect(() => {
-      BleManager.start({showAlert: false});
+      // BleManager.start({showAlert: false});
   
-      bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
-      bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan );
-      bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', handleDisconnectedPeripheral );
-      bleManagerEmitter.addListener('BleManagerDidUpdateValueForCharacteristic', handleUpdateValueForCharacteristic );
+      // bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
+      // bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan );
+      // bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', handleDisconnectedPeripheral );
+      // bleManagerEmitter.addListener('BleManagerDidUpdateValueForCharacteristic', handleUpdateValueForCharacteristic );
   
       if (Platform.OS === 'android' && Platform.Version >= 23) {
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
@@ -230,86 +306,15 @@ const PhoneSync = () => {
     );
   }
 
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            
-            <View style={{margin: 10}}>
-              <Button 
-                title={'Scan Bluetooth (' + (isScanning ? 'on' : 'off') + ')'}
-                onPress={() => startScan() } 
-              />            
-            </View>
-
-            <View style={{margin: 10}}>
-              <Button title="Retrieve connected peripherals" onPress={() => retrieveConnected() } />
-            </View>
-
-            {(list.length == 0) &&
-              <View style={{flex:1, margin: 20}}>
-                <Text style={{textAlign: 'center'}}>No peripherals</Text>
-              </View>
-            }
-          
-          </View>              
-        </ScrollView>
-        <FlatList
-            data={list}
-            renderItem={({ item }) => renderItem(item) }
-            keyExtractor={item => item.id}
-          />              
-      </SafeAreaView>
-    </>
-  );
 };
 
 const styles = StyleSheet.create({
   scrollView: {
-    backgroundColor: WHITE_COLOR,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: WHITE_COLOR,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: BLACK_COLOR,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: BLACK_COLOR,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: BLACK_COLOR,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+    backgroundColor: PRIMARY_COLOR,
+  }, 
+  containerStyle: {
+    backgroundColor: PRIMARY_COLOR,
+  }, 
 });
 
 export default PhoneSync;
